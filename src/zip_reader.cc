@@ -121,10 +121,6 @@ bool ZipReader::OpenCurrentEntryInZip() {
   return true;
 }
 
-bool ZipReader::ExtractCurrentEntryIntoDirectory(const std::string& output_directory_path) {
-    return ExtractCurrentEntryIntoDirectory(output_directory_path, "");
-}
-
 bool ZipReader::ExtractCurrentEntryIntoDirectory(
     const std::string& output_directory_path,
     const std::string& password) {
