@@ -9,8 +9,7 @@ namespace {
 
 NAN_METHOD(ZipEncrypt) {
   Nan::HandleScope scope;
-  if (info.Length() < 5 || !info[0]->IsObject() || !info[1]->IsString() || !info[2]->IsString() ||
-                           !info[3]->IsString() || !info[4]->IsFunction()){ 
+  if (info.Length() < 5 || !info[0]->IsObject() || !info[1]->IsString() || !info[2]->IsString() || !info[3]->IsString() || !info[4]->IsFunction()){ 
     Nan::ThrowTypeError("Bad arguments");
   }
 

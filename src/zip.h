@@ -9,7 +9,6 @@
 
 namespace zip {
 
-    
 bool Zip(const std::string& src_dir, const std::string& dest_file, std::string* error);
 
 //zip and encrypt from a buffer

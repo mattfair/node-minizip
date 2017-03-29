@@ -58,7 +58,6 @@ int getCrc(void *data,unsigned long data_size,unsigned long* result_crc)
    return err;
 }
 
-
 // Get all relative file paths from root_path.
 std::vector<std::string> GetAllFilesFromDirectory(
     const std::string& root_path, const std::string& relative_path) {
@@ -145,16 +144,16 @@ bool GetFileInfoForZipping(const std::string& path, zip_fileinfo* zip_info) {
 //Returns a zip_fileinfo with the current time as the modification date
 bool GetBufferInfoForZipping(zip_fileinfo* zip_info) {
 #if defined(OS_WIN)
-  FILETIME file_time;
-  HANDLE file_handle;
-  WIN32_FIND_DATAA find_data;
+    FILETIME file_time;
+    HANDLE file_handle;
+    WIN32_FIND_DATAA find_data;
 
     GetLocalTime(&(find_data.ftLastWriteTime), &file_time);
     FileTimeToDosDateTime(&file_time,
                           (LPWORD)(&zip_info->dosDate) + 1,
                           (LPWORD)(&zip_info->dosDate) + 0);
     FindClose(file_handle);
-    return true
+    return true;
 #elif defined(OS_POSIX)
     time_t rawtime;
     struct tm* file_date = localtime(&rawtime);
@@ -237,10 +236,6 @@ bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, unsigned long buf_size,
   unsigned long crcFile=0;
   int zip64 = 0;
   int err=ZIP_OK;
-
-#if defined(OS_WIN)
-  std::replace(parent_path.begin(), parent_path.end(), '\\', '/');
-#endif
 
   zip_fileinfo file_info = {};
   GetBufferInfoForZipping( &file_info);
