@@ -20,7 +20,7 @@ ZipEncryptAsyncWorker::ZipEncryptAsyncWorker(void* buf, const unsigned long buf_
 
 void ZipEncryptAsyncWorker::Execute() {
   std::string error_message;
-  if(!Zip(buf, buf_size, relative_path, dest_file, password, &error_message)){
+  if(!Zip(buf, buf_size, relative_path, dest_file, password.c_str(), &error_message)){
     SetErrorMessage(error_message.c_str());
   }
 }
@@ -47,7 +47,7 @@ UnzipDecryptAsyncWorker::UnzipDecryptAsyncWorker(const std::string& zip_file, co
 
 void UnzipDecryptAsyncWorker::Execute() {
   std::string error_message;
-  if (!Unzip(zip_file, dest_dir, password, &error_message)){
+  if (!Unzip(zip_file, dest_dir, password.c_str(), &error_message)){
     SetErrorMessage(error_message.c_str());
   }
 }

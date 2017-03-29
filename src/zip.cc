@@ -29,19 +29,17 @@ namespace {
 /**
  * calculate the CRC32 of a data buffer, used to put in the header when encrypting a file
  */
-int getCrc(void *data,unsigned long data_size,unsigned long* result_crc)
+void getCrc(void* data, unsigned long data_size, unsigned long* result_crc)
 {
-    int err = ZIP_OK;
     unsigned long buf_size = 16384;
     unsigned char buf[buf_size];
-    unsigned long size_read = 0;
+    unsigned long size_read = data_size > buf_size ? buf_size : data_size;
     unsigned long total_read = 0;
     unsigned long calculate_crc=0;
     const char *dataPtr = (char *)data;
 
-    do
+    while (size_read>0)
     {
-        err = ZIP_OK;
         size_read = (data_size-total_read) > buf_size ? buf_size : data_size-total_read;
         memcpy(buf, dataPtr, size_read);
 
@@ -51,16 +49,13 @@ int getCrc(void *data,unsigned long data_size,unsigned long* result_crc)
         dataPtr += size_read;
         total_read += size_read;
 
-    } while ((err == ZIP_OK) && (size_read>0));
+    }
 
    *result_crc=calculate_crc;
-
-   return err;
 }
 
 // Get all relative file paths from root_path.
-std::vector<std::string> GetAllFilesFromDirectory(
-    const std::string& root_path, const std::string& relative_path) {
+std::vector<std::string> GetAllFilesFromDirectory(const std::string& root_path, const std::string& relative_path) {
   std::string absolute_path = root_path + "/" + relative_path;
   std::vector<std::string> files;
 #if defined(OS_WIN)
@@ -115,35 +110,6 @@ std::vector<std::string> GetAllFilesFromDirectory(
 //Returns a zip_fileinfo with the last modification date of |path| set.
 bool GetFileInfoForZipping(const std::string& path, zip_fileinfo* zip_info) {
 #if defined(OS_WIN)
-  SYSTEMTIME localTime;
-
-  GetLocalTime(&localTime);
-  zip_info->tmz_date.tm_sec = localTime.wSecond;
-  zip_info->tmz_date.tm_min = localTime.wMinute;
-  zip_info->tmz_date.tm_hour = localTime.wHour;
-  zip_info->tmz_date.tm_mday = localTime.wDay;
-  zip_info->tmz_date.tm_mon = localTime.wMonth;
-  zip_info->tmz_date.tm_year = localTime.wYear;
-  return true;
-#elif defined(OS_POSIX)
-  struct stat s;
-  if (stat(path.c_str(), &s) == 0) {
-    struct tm* file_date = localtime(&s.st_mtime);
-    zip_info->tmz_date.tm_sec  = file_date->tm_sec;
-    zip_info->tmz_date.tm_min  = file_date->tm_min;
-    zip_info->tmz_date.tm_hour = file_date->tm_hour;
-    zip_info->tmz_date.tm_mday = file_date->tm_mday;
-    zip_info->tmz_date.tm_mon  = file_date->tm_mon ;
-    zip_info->tmz_date.tm_year = file_date->tm_year;
-    return true;
-  }
-#endif
-  return false;
-}
-
-//Returns a zip_fileinfo with the current time as the modification date
-bool GetBufferInfoForZipping(zip_fileinfo* zip_info) {
-#if defined(OS_WIN)
     FILETIME file_time;
     HANDLE file_handle;
     WIN32_FIND_DATAA find_data;
@@ -153,6 +119,35 @@ bool GetBufferInfoForZipping(zip_fileinfo* zip_info) {
                           (LPWORD)(&zip_info->dosDate) + 1,
                           (LPWORD)(&zip_info->dosDate) + 0);
     FindClose(file_handle);
+    return true;
+#elif defined(OS_POSIX)
+    struct stat s;
+    if (stat(path.c_str(), &s) == 0) {
+        struct tm* file_date = localtime(&s.st_mtime);
+        zip_info->tmz_date.tm_sec  = file_date->tm_sec;
+        zip_info->tmz_date.tm_min  = file_date->tm_min;
+        zip_info->tmz_date.tm_hour = file_date->tm_hour;
+        zip_info->tmz_date.tm_mday = file_date->tm_mday;
+        zip_info->tmz_date.tm_mon  = file_date->tm_mon ;
+        zip_info->tmz_date.tm_year = file_date->tm_year;
+        return true;
+    }
+#endif
+  return false;
+}
+
+//Returns a zip_fileinfo with the current time as the modification date
+bool GetBufferInfoForZipping(zip_fileinfo* zip_info) {
+#if defined(OS_WIN)
+    SYSTEMTIME localTime;
+
+    GetLocalTime(&localTime);
+    zip_info->tmz_date.tm_sec = localTime.wSecond;
+    zip_info->tmz_date.tm_min = localTime.wMinute;
+    zip_info->tmz_date.tm_hour = localTime.wHour;
+    zip_info->tmz_date.tm_mday = localTime.wDay;
+    zip_info->tmz_date.tm_mon = localTime.wMonth;
+    zip_info->tmz_date.tm_year = localTime.wYear;
     return true;
 #elif defined(OS_POSIX)
     time_t rawtime;
@@ -234,37 +229,33 @@ bool AddEntryToZip(zipFile zip_file, const std::string& root_path,
 
 bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, unsigned long buf_size, const std::string& relative_path, const char* password) {
   unsigned long crcFile=0;
-  int zip64 = 0;
-  int err=ZIP_OK;
 
   zip_fileinfo file_info = {};
-  GetBufferInfoForZipping( &file_info);
+  GetBufferInfoForZipping(&file_info);
 
   if (password != NULL){ 
-    err = getCrc(buf,buf_size,&crcFile);
+    getCrc(buf,buf_size,&crcFile);
   }
 
-  if (err==ZIP_OK){
-      zip64 = buf_size >= 0xffffffff;
-      err = zipOpenNewFileInZip3_64(
-                        zip_file,  // file
-                        relative_path.c_str(),  // relative filename
-                        &file_info,  // zipfi
-                        NULL,  // extrafield_local,
-                        0u,  // size_extrafield_local
-                        NULL,  // extrafield_global
-                        0u,  // size_extrafield_global
-                        NULL,  // comment
-                        Z_DEFLATED,  // method
-                        Z_DEFAULT_COMPRESSION,  // level
-                        0,  // raw
-                        -MAX_WBITS,  // windowBits
-                        DEF_MEM_LEVEL,  // memLevel
-                        Z_DEFAULT_STRATEGY,  // strategy
-                        password,  // password
-                        crcFile,
-                        zip64);  // crcForCrypting
-  }
+  int zip64 = buf_size >= 0xffffffff;
+  int err = zipOpenNewFileInZip3_64(
+                    zip_file,  // file
+                    relative_path.c_str(),  // relative filename
+                    &file_info,  // zipfi
+                    NULL,  // extrafield_local,
+                    0u,  // size_extrafield_local
+                    NULL,  // extrafield_global
+                    0u,  // size_extrafield_global
+                    NULL,  // comment
+                    Z_DEFLATED,  // method
+                    Z_DEFAULT_COMPRESSION,  // level
+                    0,  // raw
+                    -MAX_WBITS,  // windowBits
+                    DEF_MEM_LEVEL,  // memLevel
+                    Z_DEFAULT_STRATEGY,  // strategy
+                    password,  // password
+                    crcFile,
+                    zip64);  // crcForCrypting
   
   if(err == ZIP_OK) {
       bool success = true;
@@ -280,7 +271,7 @@ bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, unsigned long buf_size,
 
 namespace zip {
 
-bool Zip(void* buf, const unsigned long buf_size, const std::string& relative_path, const std::string& dest_file, const std::string& password, std::string* error) {
+bool Zip(void* buf, const unsigned long buf_size, const std::string& relative_path, const std::string& dest_file, const char* password, std::string* error) {
   zipFile zip_file = internal::OpenForZipping(dest_file.c_str(), APPEND_STATUS_CREATE);
   if (!zip_file) {
     if (error){
@@ -289,7 +280,7 @@ bool Zip(void* buf, const unsigned long buf_size, const std::string& relative_pa
     return false;
   }
 
-  if(!AddEncryptedEntryToZip(zip_file, buf, buf_size, relative_path, password.c_str())) {
+  if(!AddEncryptedEntryToZip(zip_file, buf, buf_size, relative_path, password)) {
     if (error){
       *error = "Couldn't add encrypted entry to zip file " + dest_file + ".";
     }
@@ -370,7 +361,7 @@ bool Unzip(const std::string& zip_file, const std::string& dest_dir,
   return true;
 }
 
-bool Unzip(const std::string& zip_file, const std::string& dest_dir, const std::string& password, std::string* error) {
+bool Unzip(const std::string& zip_file, const std::string& dest_dir, const char* password, std::string* error) {
   if (dest_dir.empty()) {
     if (error)
       *error = "dest_dir shouldn't be empty.";
