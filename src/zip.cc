@@ -29,7 +29,7 @@ namespace {
 /**
  * calculate the CRC32 of a data buffer, used to put in the header when encrypting a file
  */
-void getCrc(void* data, unsigned long data_size, unsigned long* result_crc)
+void getCrc(void* data, size_t data_size, unsigned long* result_crc)
 {
     const unsigned long buf_size = 16384;
     unsigned char buf[buf_size];
@@ -230,7 +230,7 @@ bool AddEntryToZip(zipFile zip_file, const std::string& root_path,
   return success;
 }
 
-bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, unsigned long buf_size, const std::string& relative_path, const char* password) {
+bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, size_t buf_size, const std::string& relative_path, const char* password) {
   unsigned long crcFile=0;
 
   zip_fileinfo file_info = {};
