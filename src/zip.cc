@@ -32,23 +32,20 @@ namespace {
 void getCrc(void* data, size_t data_size, unsigned long* result_crc)
 {
     const unsigned long buf_size = 16384;
-    unsigned char buf[buf_size];
     size_t size_read = data_size > buf_size ? buf_size : data_size;
     size_t total_read = 0;
     uLong calculate_crc=0;
-    const char *dataPtr = (char *)data;
+    const unsigned char *dataPtr = (unsigned char *)data;
 
     while (size_read>0)
     {
-        size_read = (data_size-total_read) > buf_size ? buf_size : data_size-total_read;
-        memcpy(buf, dataPtr, size_read);
-
-        if (size_read>0){
-            calculate_crc = crc32(calculate_crc,buf, static_cast<uInt>(size_read));
-        }
+        calculate_crc = crc32(calculate_crc,dataPtr, static_cast<uInt>(size_read));
+        
         dataPtr += size_read;
         total_read += size_read;
 
+        //calculate the size of the next chunk to read
+        size_read = (data_size-total_read) > buf_size ? buf_size : data_size-total_read;
     }
 
    *result_crc=calculate_crc;
@@ -225,13 +222,13 @@ bool AddEntryToZip(zipFile zip_file, const std::string& root_path,
     return false;
   }
 
-  bool success = true;
-  success = AddFileToZip(zip_file, absolute_path);
+  if(AddFileToZip(zip_file, absolute_path)) {
+      if (ZIP_OK != zipCloseFileInZip(zip_file)){
+        return false;
+      }
+  }
 
-  if (ZIP_OK != zipCloseFileInZip(zip_file))
-    return false;
-
-  return success;
+  return true;
 }
 
 bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, size_t buf_size, const std::string& relative_path, const char* password) {
@@ -265,10 +262,9 @@ bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, size_t buf_size, const 
                     zip64);  // crcForCrypting
   
   if(err == ZIP_OK) {
-      bool success = true;
-      success = AddFileToZip(zip_file, buf, buf_size);
-
-      err = zipCloseFileInZip(zip_file);
+      if(AddFileToZip(zip_file, buf, buf_size)){
+        err = zipCloseFileInZip(zip_file);
+      }
   }
 
   return err == ZIP_OK;
