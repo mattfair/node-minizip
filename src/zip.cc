@@ -274,7 +274,7 @@ bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, unsigned long buf_size,
 
 namespace zip {
 
-bool Zip(void* buf, const unsigned long buf_size, const std::string& relative_path, const std::string& dest_file, const char* password, std::string* error) {
+bool Zip(void* buf, const size_t buf_size, const std::string& relative_path, const std::string& dest_file, const char* password, std::string* error) {
   zipFile zip_file = internal::OpenForZipping(dest_file.c_str(), APPEND_STATUS_CREATE);
   if (!zip_file) {
     if (error){
