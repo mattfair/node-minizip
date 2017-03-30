@@ -185,7 +185,7 @@ bool AddFileToZip(zipFile zip_file, const std::string& absolute_path) {
   return true;
 }
 
-bool AddFileToZip(zipFile zip_file, void* buf, unsigned long buf_size) {
+bool AddFileToZip(zipFile zip_file, void* buf, size_t buf_size) {
   return ZIP_OK == zipWriteInFileInZip(zip_file, buf, buf_size);
 }
 

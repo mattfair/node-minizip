@@ -8,7 +8,7 @@
 
 namespace zip {
 
-ZipEncryptAsyncWorker::ZipEncryptAsyncWorker(void* buf, const unsigned long buf_size, const std::string& relative_path, const std::string& dest_file, const std::string& password, Nan::Callback *callback) :
+ZipEncryptAsyncWorker::ZipEncryptAsyncWorker(void* buf, const size_t buf_size, const std::string& relative_path, const std::string& dest_file, const std::string& password, Nan::Callback *callback) :
      Nan::AsyncWorker(callback),
      buf(buf),
      buf_size(buf_size),

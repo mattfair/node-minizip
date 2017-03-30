@@ -24,13 +24,13 @@ class ZipAsyncWorker : public Nan::AsyncWorker {
 
 class ZipEncryptAsyncWorker : public Nan::AsyncWorker {
  public:
-  ZipEncryptAsyncWorker(void* buf, const unsigned long buf_size, const std::string& relative_path, const std::string& dest_file, const std::string& password, Nan::Callback *callback);
+  ZipEncryptAsyncWorker(void* buf, const size_t buf_size, const std::string& relative_path, const std::string& dest_file, const std::string& password, Nan::Callback *callback);
 
   // Override Nan::AsyncWorker methods.
   virtual void Execute();
  private:
   void* buf;
-  const unsigned long buf_size;
+  const size_t buf_size;
   const std::string relative_path;
   const std::string dest_file;
   const std::string password;

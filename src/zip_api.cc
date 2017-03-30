@@ -14,7 +14,7 @@ NAN_METHOD(ZipEncrypt) {
   }
 
   v8::Local<v8::Object> stream = info[0].As<v8::Object>();
-  int size = node::Buffer::Length(stream);
+  size_t size = node::Buffer::Length(stream);
   void *buffer = node::Buffer::Data(stream);
   std::string relative_path(*(v8::String::Utf8Value(info[1])));
   std::string dest_file(*(v8::String::Utf8Value(info[2])));
