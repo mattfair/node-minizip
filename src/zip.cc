@@ -154,13 +154,17 @@ bool GetBufferInfoForZipping(zip_fileinfo* zip_info) {
     return true;
 #elif defined(OS_POSIX)
     time_t rawtime;
-    struct tm* file_date = localtime(&rawtime);
-    zip_info->tmz_date.tm_sec  = file_date->tm_sec;
-    zip_info->tmz_date.tm_min  = file_date->tm_min;
-    zip_info->tmz_date.tm_hour = file_date->tm_hour;
-    zip_info->tmz_date.tm_mday = file_date->tm_mday;
-    zip_info->tmz_date.tm_mon  = file_date->tm_mon ;
-    zip_info->tmz_date.tm_year = file_date->tm_year;
+    struct tm* timeinfo;
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    zip_info->tmz_date.tm_sec  = timeinfo->tm_sec;
+    zip_info->tmz_date.tm_min  = timeinfo->tm_min;
+    zip_info->tmz_date.tm_hour = timeinfo->tm_hour;
+    zip_info->tmz_date.tm_mday = timeinfo->tm_mday;
+    zip_info->tmz_date.tm_mon  = timeinfo->tm_mon ;
+    zip_info->tmz_date.tm_year = timeinfo->tm_year;
     return true;
 #endif
 }
