@@ -34,8 +34,8 @@ void getCrc(void* data, size_t data_size, unsigned long* result_crc)
     const unsigned long buf_size = 16384;
     unsigned char buf[buf_size];
     size_t size_read = data_size > buf_size ? buf_size : data_size;
-    unsigned long total_read = 0;
-    unsigned long calculate_crc=0;
+    size_t total_read = 0;
+    uLong calculate_crc=0;
     const char *dataPtr = (char *)data;
 
     while (size_read>0)
@@ -44,7 +44,7 @@ void getCrc(void* data, size_t data_size, unsigned long* result_crc)
         memcpy(buf, dataPtr, size_read);
 
         if (size_read>0){
-            calculate_crc = crc32(calculate_crc,buf,size_read);
+            calculate_crc = crc32(calculate_crc,buf, static_cast<uInt>(size_read));
         }
         dataPtr += size_read;
         total_read += size_read;
