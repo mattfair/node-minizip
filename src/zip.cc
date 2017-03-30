@@ -31,7 +31,7 @@ namespace {
  */
 void getCrc(void* data, unsigned long data_size, unsigned long* result_crc)
 {
-    unsigned long buf_size = 16384;
+    const unsigned long buf_size = 16384;
     unsigned char buf[buf_size];
     unsigned long size_read = data_size > buf_size ? buf_size : data_size;
     unsigned long total_read = 0;
@@ -114,12 +114,15 @@ bool GetFileInfoForZipping(const std::string& path, zip_fileinfo* zip_info) {
     HANDLE file_handle;
     WIN32_FIND_DATAA find_data;
 
-    GetLocalTime(&(find_data.ftLastWriteTime), &file_time);
-    FileTimeToDosDateTime(&file_time,
-                          (LPWORD)(&zip_info->dosDate) + 1,
-                          (LPWORD)(&zip_info->dosDate) + 0);
-    FindClose(file_handle);
-    return true;
+    file_handle = FindFirstFileA(path.c_str(), &find_data);
+    if (file_handle != INVALID_HANDLE_VALUE) {
+        FileTimeToLocalFileTime(&(find_data.ftLastWriteTime), &file_time);
+        FileTimeToDosDateTime(&file_time,
+                              (LPWORD)(&zip_info->dosDate) + 1,
+                              (LPWORD)(&zip_info->dosDate) + 0);
+        FindClose(file_handle);
+        return true;
+    }
 #elif defined(OS_POSIX)
     struct stat s;
     if (stat(path.c_str(), &s) == 0) {
