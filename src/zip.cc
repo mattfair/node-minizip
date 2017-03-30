@@ -33,7 +33,7 @@ void getCrc(void* data, size_t data_size, unsigned long* result_crc)
 {
     const unsigned long buf_size = 16384;
     unsigned char buf[buf_size];
-    unsigned long size_read = data_size > buf_size ? buf_size : data_size;
+    size_t size_read = data_size > buf_size ? buf_size : data_size;
     unsigned long total_read = 0;
     unsigned long calculate_crc=0;
     const char *dataPtr = (char *)data;
@@ -186,7 +186,7 @@ bool AddFileToZip(zipFile zip_file, const std::string& absolute_path) {
 }
 
 bool AddFileToZip(zipFile zip_file, void* buf, size_t buf_size) {
-  return ZIP_OK == zipWriteInFileInZip(zip_file, buf, buf_size);
+  return ZIP_OK == zipWriteInFileInZip(zip_file, buf, static_cast<unsigned int>(buf_size));
 }
 
 
