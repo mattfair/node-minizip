@@ -34,28 +34,20 @@ describe('node-minizip API', function() {
     });
   });
   it('test zip file for single file with encryption from buffer', function(done) {
-    var stream = fs.createReadStream('test/tmp/foo.txt');
-    var data = [];
-    stream.on('data', function(chunk) {
-        data.push(chunk);
-    });
+    var buffer = fs.readFileSync('test/tmp/foo.txt');
+    minizip.zip(buffer, 'foo.txt', 'test/data-password.zip', 'password', function(err) {
+        if (err){
+          throw err;
+        }
 
-    stream.on('end', function() {
-        var buffer = Buffer.concat(data);
-        minizip.zip(buffer, 'foo.txt', 'test/data-password.zip', 'password', function(err) {
+        minizip.unzip('test/data-password.zip', 'test/tmp2', 'password', function(err) {
             if (err){
-              throw err;
+                throw err;
             }
 
-            minizip.unzip('test/data-password.zip', 'test/tmp2', 'password', function(err) {
-                if (err){
-                    throw err;
-                }
-
-                assert.notEqual(-1, fs.readFileSync('test/tmp2/foo.txt').toString().indexOf('foo'));
-                done();
-          });
-        });
+            assert.ok(fs.readFileSync('test/tmp2/foo.txt').equals(buffer));
+            done();
+      });
     });
   });
 });

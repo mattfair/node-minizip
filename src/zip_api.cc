@@ -40,7 +40,7 @@ NAN_METHOD(Zip) {
       Nan::Callback* callback = new Nan::Callback(info[3].As<v8::Function>());
       Nan::AsyncQueueWorker(new zip::ZipAsyncWorker(src_dir, dest_dir, callback, password.c_str()));
   } else if(info.Length() == 5) {
-      if (info.Length() < 5 || !info[0]->IsObject() || !info[1]->IsString() || !info[2]->IsString() || !info[3]->IsString() || !info[4]->IsFunction()){ 
+      if (!info[0]->IsObject() || !info[1]->IsString() || !info[2]->IsString() || !info[3]->IsString() || !info[4]->IsFunction()){ 
         Nan::ThrowTypeError("Bad arguments");
         return;
       }
