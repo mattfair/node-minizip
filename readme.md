@@ -29,6 +29,33 @@ Minizip.unzip('path/to/name.zip', 'dest/dir', function(err) {
   else
     console.log('unzip successfully.');
 });
+
+
+//encrypt/decrypt example
+var stream = fs.createReadStream('path/to/file-to-encrypt.txt');
+var data = [];
+stream.on('data', function(chunk) {
+    data.push(chunk);
+});
+
+stream.on('end', function() {
+    var buffer = Buffer.concat(data);
+    Minizip.zip(buffer, 'filename-for-buffer.txt', 'your/path/name.zip', 'password', function(err) {
+        if (err){
+            console.error(err);
+        } else {
+            console.log('zip successfully.');
+        }
+    });
+});
+
+Minizip.unzip('path/to/name.zip', 'dest/dir', 'password', function(err) {
+    if (err){
+        console.error(err);
+    } else {
+        console.log('unzip successfully');
+    }
+});
 ```
 
 ## APIs
@@ -39,10 +66,24 @@ Minizip.unzip('path/to/name.zip', 'dest/dir', function(err) {
 * `dest_file` String
 * `callback` Function(err)
 
+###Minizip.zip(buffer, dest_file, password, callback)
+
+* `buffer` Buffer 
+* `dest_file` String
+* `password` String
+* `callback` Function(err)
+
 ###Minizip.unzip(zip_file, unzip_dir, callback)
 
 * `zip_file` String
 * `unzip_dir` String
+* `callback` Function(err)
+
+###Minizip.unzip(zip_file, unzip_dir, password, callback)
+
+* `zip_file` String
+* `unzip_dir` String
+* `password` String
 * `callback` Function(err)
 
 ## License

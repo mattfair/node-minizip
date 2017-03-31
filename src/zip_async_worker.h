@@ -13,26 +13,30 @@ namespace zip {
 
 class ZipAsyncWorker : public Nan::AsyncWorker {
  public:
-  ZipAsyncWorker(const std::string& src_dir, const std::string& dest_file,
-      Nan::Callback* callback);
+  ZipAsyncWorker(const std::string& src_dir, const std::string& dest_file, Nan::Callback* callback, const std::string& password = "");
+  ZipAsyncWorker(void* buf, const size_t buf_size, const std::string& relative_path, const std::string& dest_file, Nan::Callback *callback, const std::string& password = "");
 
   // Override Nan::AsyncWorker methods.
   virtual void Execute();
  private:
-  const std::string src_dir_;
-  const std::string dest_file_;
+  void* buf;
+  const size_t buf_size;
+  const std::string src_dir;
+  const std::string dest_file;
+  const std::string relative_path;
+  const std::string password;
 };
 
 class UnzipAsyncWorker : public Nan::AsyncWorker {
  public:
-  UnzipAsyncWorker(const std::string& zip_file, const std::string& dest_dir,
-      Nan::Callback* callback);
+  UnzipAsyncWorker(const std::string& zip_file, const std::string& dest_dir, Nan::Callback* callback, const std::string& password = "");
 
   // Override Nan::AsyncWorker methods.
   virtual void Execute();
  private:
-  const std::string zip_file_;
-  const std::string dest_dir_;
+  const std::string zip_file;
+  const std::string dest_dir;
+  const std::string password;
 };
 
 }  // namespace zip

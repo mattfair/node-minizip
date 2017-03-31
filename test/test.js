@@ -33,4 +33,21 @@ describe('node-minizip API', function() {
       done();
     });
   });
+  it('test zip file for single file with encryption from buffer', function(done) {
+    var buffer = fs.readFileSync('test/tmp/foo.txt');
+    minizip.zip(buffer, 'foo.txt', 'test/data-password.zip', 'password', function(err) {
+        if (err){
+          throw err;
+        }
+
+        minizip.unzip('test/data-password.zip', 'test/tmp2', 'password', function(err) {
+            if (err){
+                throw err;
+            }
+
+            assert.ok(fs.readFileSync('test/tmp2/foo.txt').equals(buffer));
+            done();
+      });
+    });
+  });
 });
