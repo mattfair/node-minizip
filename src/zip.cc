@@ -202,7 +202,7 @@ bool AddEntryToZip(zipFile zip_file, const std::string& root_path,
       parent_path + "/" + relative_path);
   GetFileInfoForZipping(absolute_path, &file_info);
 
-  if (ZIP_OK != zipOpenNewFileInZip3(
+  int err = zipOpenNewFileInZip3(
                     zip_file,  // file
                     relative_path.c_str(),  // relative filename
                     &file_info,  // zipfi
@@ -218,17 +218,17 @@ bool AddEntryToZip(zipFile zip_file, const std::string& root_path,
                     DEF_MEM_LEVEL,  // memLevel
                     Z_DEFAULT_STRATEGY,  // strategy
                     NULL,  // password
-                    0)) {  // crcForCrypting
-    return false;
-  }
+                    0);  // crcForCrypting
 
-  if(AddFileToZip(zip_file, absolute_path)) {
-      if (ZIP_OK != zipCloseFileInZip(zip_file)){
-        return false;
+  if(err == ZIP_OK) {
+      if(AddFileToZip(zip_file, absolute_path)){
+         err = zipCloseFileInZip(zip_file);
+      } else {
+         err =  ZIP_INTERNALERROR; 
       }
   }
 
-  return true;
+  return err == ZIP_OK;
 }
 
 bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, size_t buf_size, const std::string& relative_path, const char* password) {
@@ -264,6 +264,8 @@ bool AddEncryptedEntryToZip(zipFile zip_file, void *buf, size_t buf_size, const 
   if(err == ZIP_OK) {
       if(AddFileToZip(zip_file, buf, buf_size)){
         err = zipCloseFileInZip(zip_file);
+      } else {
+         err =  ZIP_INTERNALERROR; 
       }
   }
 

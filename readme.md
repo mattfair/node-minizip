@@ -40,7 +40,7 @@ stream.on('data', function(chunk) {
 
 stream.on('end', function() {
     var buffer = Buffer.concat(data);
-    Minizip.zip_encrypt(buffer, 'filename-for-buffer.txt', 'your/path/name.zip', 'password', function(err) {
+    Minizip.zip(buffer, 'filename-for-buffer.txt', 'your/path/name.zip', 'password', function(err) {
         if (err){
             console.error(err);
         } else {
@@ -49,7 +49,7 @@ stream.on('end', function() {
     });
 });
 
-Minizip.unzip_decrypt('path/to/name.zip', 'dest/dir', 'password', function(err) {
+Minizip.unzip('path/to/name.zip', 'dest/dir', 'password', function(err) {
     if (err){
         console.error(err);
     } else {
@@ -66,20 +66,20 @@ Minizip.unzip_decrypt('path/to/name.zip', 'dest/dir', 'password', function(err) 
 * `dest_file` String
 * `callback` Function(err)
 
-###Minizip.unzip(zip_file, unzip_dir, callback)
-
-* `zip_file` String
-* `unzip_dir` String
-* `callback` Function(err)
-
-###Minizip.zip_encrypt(buffer, dest_file, password, callback)
+###Minizip.zip(buffer, dest_file, password, callback)
 
 * `buffer` Buffer 
 * `dest_file` String
 * `password` String
 * `callback` Function(err)
 
-###Minizip.unzip_decrypt(zip_file, unzip_dir, password, callback)
+###Minizip.unzip(zip_file, unzip_dir, callback)
+
+* `zip_file` String
+* `unzip_dir` String
+* `callback` Function(err)
+
+###Minizip.unzip(zip_file, unzip_dir, password, callback)
 
 * `zip_file` String
 * `unzip_dir` String
